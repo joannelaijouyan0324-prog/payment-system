@@ -2,9 +2,12 @@ package com.joanne.payment.service;
 
 import com.joanne.payment.entity.User;
 import com.joanne.payment.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -33,5 +36,20 @@ public class UserService {
         user.setUpdatedAt(now);
 
         return this.userRepository.save(user);
+    }
+
+    public User login(String email, String password){
+
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if(user.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
+        if(!user.get().getPasswordHash().equals(password)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
+        return user.get();
     }
 }
